@@ -1,0 +1,21 @@
+version: '2'
+services:
+  results:
+    build: .
+    command: bash -c "./wait-for-it.sh db:3306 -- python3 create-db-schema.py && uwsgi --socket 0.0.0.0:5000 --uid uwsgi --plugins python3 --py-autoreload 3 --protocol http --wsgi wsgi:app"
+    ports:
+      - 5000:5000
+    environment:
+      DATABASE_URI: mysql+mysqlconnector://results:results@db/results
+  db:
+    image: mysql:5.7
+    volumes:
+      - mysql-data:/var/lib/mysql
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=results
+      - MYSQL_USER=results
+      - MYSQL_PASSWORD=results
+
+volumes:
+  mysql-data: {}
